@@ -1141,7 +1141,7 @@ settings_changed (GSettings *settings,
     }
   else if (g_str_equal (key, KEY_WS_NAMES_GNOME))
     {
-      return;
+      goto releasevalue;
     }
   else
     {
@@ -1149,6 +1149,7 @@ settings_changed (GSettings *settings,
       g_assert_not_reached ();
     }
 
+releasevalue:
   g_variant_unref (value);
 }
 
