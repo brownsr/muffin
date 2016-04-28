@@ -1334,7 +1334,12 @@ LOCAL_SYMBOL gboolean
 meta_window_actor_should_unredirect (MetaWindowActor *self)
 {
   MetaWindow *metaWindow = meta_window_actor_get_meta_window (self);
+  MetaScreen *screen = meta_window_get_screen (metaWindow);
   MetaWindowActorPrivate *priv = self->priv;
+  int screen_width, screen_height;
+  MetaRectangle window_rect, monitor_rect;
+  int num_monitors = meta_screen_get_n_monitors (screen);
+  int i;
 
   if (meta_window_requested_dont_bypass_compositor (metaWindow))
     return FALSE;
@@ -1357,11 +1362,32 @@ meta_window_actor_should_unredirect (MetaWindowActor *self)
   if (meta_window_requested_bypass_compositor (metaWindow))
     return TRUE;
 
-  if (meta_window_is_override_redirect (metaWindow))
-    return TRUE;
+  if (!meta_window_is_override_redirect (metaWindow))
+    return FALSE;
 
   if (priv->does_full_damage)
     return TRUE;
+
+  if (priv->opacity != 0xff)
+    return FALSE;
+
+  if (priv->argb32)
+    return FALSE;
+
+  meta_screen_get_size (screen, &screen_width, &screen_height);
+  meta_window_get_outer_rect (metaWindow, &window_rect);
+
+  if (window_rect.x == 0 && window_rect.y == 0 &&
+      window_rect.width == screen_width && window_rect.height == screen_height)
+    return TRUE;
+
+  for (i = 0; i < num_monitors; i++)
+    {
+      meta_screen_get_monitor_geometry (screen , i, &monitor_rect);
+      if (monitor_rect.x == window_rect.x && monitor_rect.y == window_rect.y &&
+          monitor_rect.width == window_rect.width && monitor_rect.height == window_rect.height)
+          return TRUE;
+    }
 
   return FALSE;
 }
