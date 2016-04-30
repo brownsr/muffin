@@ -2359,7 +2359,8 @@ build_and_scan_frame_mask (MetaWindowActor       *self,
       cairo_surface_flush (surface);
       scanned_region = scan_visible_region (mask_data, stride, frame_paint_region);
       cairo_region_union (shape_region, scanned_region);
-      cairo_region_destroy (scanned_region);;
+      cairo_region_destroy (scanned_region);
+      cairo_region_destroy (frame_paint_region);
    }
 
    cairo_destroy (cr);
